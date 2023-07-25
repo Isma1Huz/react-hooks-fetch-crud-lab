@@ -1,25 +1,51 @@
 import React, { useState } from "react";
+const Api = "http://localhost:3000/questions";
 
 function QuestionForm(props) {
   const [formData, setFormData] = useState({
     prompt: "",
-    answer1: "",
-    answer2: "",
-    answer3: "",
-    answer4: "",
+    answers: ["", "", "", ""],
     correctIndex: 0,
   });
 
   function handleChange(event) {
-    setFormData({
-      ...formData,
-      [event.target.name]: event.target.value,
-    });
+    event.preventDefault();
+    const { name, value } = event.target;
+    
+    if (name === "answers") {
+      const index = event.target.dataset.index;
+      setFormData((prevFormData) => {
+        const updatedAnswers = [...prevFormData.answers];
+        updatedAnswers[index] = value;
+        return {
+          ...prevFormData,
+          answers: updatedAnswers,
+        };
+      });
+    } else {
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
+    }
   }
 
   function handleSubmit(event) {
     event.preventDefault();
-    console.log(formData);
+    
+    // Perform the POST request to send the form data
+    fetch(Api, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(formData)
+    })
+      .then(res => res.json())
+      .then(data => console.log(data))
+      .catch(error => console.error(error));
+
+    console.log(formData); // This will display the form data in the console before the POST request is completed.
   }
 
   return (
@@ -39,8 +65,9 @@ function QuestionForm(props) {
           Answer 1:
           <input
             type="text"
-            name="answer1"
-            value={formData.answer1}
+            name="answers"
+            data-index="0"
+            value={formData.answers[0]}
             onChange={handleChange}
           />
         </label>
@@ -48,8 +75,9 @@ function QuestionForm(props) {
           Answer 2:
           <input
             type="text"
-            name="answer2"
-            value={formData.answer2}
+            name="answers"
+            data-index="1"
+            value={formData.answers[1]}
             onChange={handleChange}
           />
         </label>
@@ -57,8 +85,9 @@ function QuestionForm(props) {
           Answer 3:
           <input
             type="text"
-            name="answer3"
-            value={formData.answer3}
+            name="answers"
+            data-index="2"
+            value={formData.answers[2]}
             onChange={handleChange}
           />
         </label>
@@ -66,8 +95,9 @@ function QuestionForm(props) {
           Answer 4:
           <input
             type="text"
-            name="answer4"
-            value={formData.answer4}
+            name="answers"
+            data-index="3"
+            value={formData.answers[3]}
             onChange={handleChange}
           />
         </label>
@@ -78,10 +108,10 @@ function QuestionForm(props) {
             value={formData.correctIndex}
             onChange={handleChange}
           >
-            <option value="0">{formData.answer1}</option>
-            <option value="1">{formData.answer2}</option>
-            <option value="2">{formData.answer3}</option>
-            <option value="3">{formData.answer4}</option>
+            <option value="0">Answer 1</option>
+            <option value="1">Answer 2</option>
+            <option value="2">Answer 3</option>
+            <option value="3">Answer 4</option>
           </select>
         </label>
         <button type="submit">Add Question</button>
